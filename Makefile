@@ -3,5 +3,5 @@ CC = gcc
 
 all: seek
 
-jacobi: seek.o
-		${CC} ${CFLAGS} -o dumbsolve dumbsolve.c -lm
+seek: seek.o
+		${CC} ${CFLAGS} -o seek seek.c -lm
