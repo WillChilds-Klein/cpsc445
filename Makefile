@@ -1,4 +1,4 @@
-CFLAGS = -g3 #-pedantic #-std=c99 -g3 -Wall
+CFLAGS = -g3 -std=c99 #-pedantic #-std=c99 -g3 -Wall
 CC = gcc
 
 all: seek
