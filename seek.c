@@ -139,16 +139,17 @@ void build_tree(Point* points, Box* qtree, int* qtreeSize, int* perm, int n, int
 		// check if > k points in box. 
 		// if so, create children and continue iterations
 		// set maxInd to index of last child.
-		numPointsInBox = 0;
-		for(i = curr.perm_start; i < curr.perm_end; i++){
-			// count number of points in box to decide whether or not to split.
-			if(currIndex >= 0 && point_in_box(points[perm[i]], curr))
-				numPointsInBox++;
-			if(numPointsInBox > k)
-				break;
-		}
+		// numPointsInBox = 0;
+		// for(i = curr.perm_start; i < curr.perm_end; i++){
+		// 	// count number of points in box to decide whether or not to split.
+		// 	if(currIndex >= 0 && point_in_box(points[perm[i]], curr))
+		// 		numPointsInBox++;
+		// 	if(numPointsInBox > k)
+		// 		break;
+		// }
 		// bust out the kidses
-		if(numPointsInBox > k){
+		if(curr.perm_end - curr.perm_start >= k){
+		//if(numPointsInBox > k){
 			Box c1, c2, c3, c4;
 			c1.c1=c1.c2=c1.c3=c1.c4= -1;
 			c2.c1=c2.c2=c2.c3=c2.c4= -1;
@@ -296,30 +297,6 @@ void sort(int* perm, Point* points, int start, int end, int* indexes, Point ll, 
 		for(; i < c1ind+c2ind+c3ind+c4ind+1; i++)
 			perm[i] = c4_arr[i-c1ind-c2ind-c3ind];
 	}
-
-	// i = indexes[0] = start;
-	// if(c1ind >= 0){
-	// 	for(; i < c1ind+1; i++)
-	// 		perm[i] = c1_arr[i];
-	// }else{c1ind = 0;}
-
-	// indexes[1] = i; 
-	// if(c2ind >= 0){
-	// 	for(; i < c1ind+c2ind+1; i++)
-	// 		perm[i] = c2_arr[i-c1ind];
-	// }else{c2ind = 0;}
-
-	// indexes[2] = i;
-	// if(c3ind >= 0){
-	// 	for(; i < c1ind+c2ind+c3ind+1; i++)
-	// 		perm[i] = c3_arr[i-c1ind-c2ind];
-	// }else{c3ind = 0;}
-
-	// indexes[3] = i;
-	// if(c4ind >= 0){
-	// 	for(; i < c1ind+c2ind+c3ind+c4ind+1; i++)
-	// 		perm[i] = c4_arr[i-c1ind-c2ind-c3ind];
-	// }else{c4ind = 0;}
 
 	//assert(i == end);
 
