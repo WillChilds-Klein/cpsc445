@@ -70,9 +70,9 @@ int main(){
 }
 
 void seek(double* a, int n, int k, int* iz){
-	int i, *qtreeSize, *perm;
-	Box **qtree;
-	Point temp, *points;
+	int i, *qtreeSize, *perm, currIndex;
+	Box **qtree, *curr;
+	Point temp, *points, p;
 
 	// make points easier to work with.
 	points = malloc(n * sizeof(Point));
@@ -89,11 +89,33 @@ void seek(double* a, int n, int k, int* iz){
 		perm[i] = i;
 	}
 
+	// build quad tree
 	qtreeSize = malloc(sizeof(int));
 	*qtreeSize = 5000;
 	qtree = calloc(*qtreeSize, sizeof(Box*));
 	build_tree(points, qtree, qtreeSize, perm, n, k);
 
+	// traverse quad tree for each point.
+	for(i = 0; i < n; i++){
+		p = points[i];
+		curr = qtree[0];
+		currIndex = 0;
+		// find smallest box (leaf) that holds point.
+		while(1){
+			if(curr->c1 < 0)
+				break;
+			else if(point_in_box(p, *(qtree[curr->c1])))
+				currIndex = curr->c1;
+			else if(point_in_box(p, *(qtree[curr->c2])))
+				currIndex = curr->c2;
+			else if(point_in_box(p, *(qtree[curr->c3])))
+				currIndex = curr->c3;
+			else if(point_in_box(p, *(qtree[curr->c4])))
+				currIndex = curr->c4;
+			curr = qtree[currIndex];
+		}
+		printf("point %d [%f, %f] is in box at index %d of qtree\n", i, p.x, p.y, currIndex);
+	}
 
 	// REMEMBER TO INCREMENT INDICES WHEN FINISHED DEVELOPING
 	for(i = 0; i < *qtreeSize; i++){
