@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+ #define MAX(X,Y) ((X) > (Y) ? : (X) : (Y))
+
 #define INT_MAX (pow(2, 64))
 #define REALLY_BIG_NUMBER (1000000)
 
@@ -15,6 +17,9 @@ typedef struct point {
 } Point;
 
 typedef struct box {
+	// index of this Box in quad tree.
+	int index;
+
 	// points of corners
 	struct point ll_corner;
 	struct point ur_corner;
@@ -34,6 +39,8 @@ typedef struct box {
 } Box;
 
 void seek(double* a, int n, int k, int* iz);
+double gen_radius(Point p, Box *curr, Box **qtree);
+double furthest_corner_distance(Point p, Box b);
 void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, int k);
 void sort(int* perm, Point* points, int start, int end, int* indexes, Box c1, Box c2, Box c3, Box c4);
 int point_in_box(Point p, Box b);
@@ -73,6 +80,7 @@ void seek(double* a, int n, int k, int* iz){
 	int i, *qtreeSize, *perm, currIndex;
 	Box **qtree, *curr;
 	Point temp, *points, p;
+	double radius;
 
 	// make points easier to work with.
 	points = malloc(n * sizeof(Point));
@@ -115,6 +123,11 @@ void seek(double* a, int n, int k, int* iz){
 			curr = qtree[currIndex];
 		}
 		printf("point %d [%f, %f] is in box at index %d of qtree\n", i, p.x, p.y, currIndex);
+
+		//generate circle radius, center is Point p.
+		radius = gen_radius(p, curr, qtree);
+		printf("radius: %f\n", radius);
+
 	}
 
 	// REMEMBER TO INCREMENT INDICES WHEN FINISHED DEVELOPING
@@ -124,6 +137,26 @@ void seek(double* a, int n, int k, int* iz){
 	}
 	free(qtree);
 	free(qtreeSize);
+}
+
+double gen_radius(Point p, Box *curr, Box **qtree){
+	double ulDist, urDist, llDist, lrDist, maxDist;
+	Point ul_corner, lr_corner;
+	Box *b;
+
+	b = qtree[curr->parent];
+
+	ul_corner.x = b->ll_corner.x;
+	ul_corner.y = b->ur_corner.y;
+	lr_corner.x = b->ur_corner.x;
+	lr_corner.y = b->ll_corner.y;
+
+	ulDist = pointDistance(p, ul_corner);
+	urDist = pointDistance(p, b->ur_corner);
+	llDist = pointDistance(p, b->ll_corner);
+	lrDist = pointDistance(p, lr_corner);
+
+	return fmax(ulDist, fmax(urDist, fmax(llDist, lrDist)));
 }
 
 void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, int k){
@@ -138,7 +171,9 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 	root->ll_corner.y = 0;
 	root->perm_start = 0;
 	root->perm_end = n;
+	root->parent = 0;
 	root->check = 0;
+	root->index = 0;
 	qtree[0] = root;
 
 	currIndex = 0;
@@ -179,6 +214,8 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 			c4->c1=c4->c2=c4->c3=c4->c4= -1;
 			// init check values
 			c1->check = c2->check = c3->check = c4->check = 0;
+			// assign parent val.
+			c1->parent = c2->parent = c3->parent = c4->parent = currIndex;
 			// CHECK ALL THIS SHTUFF...
 			// determine boundaries of children
 			c1->ll_corner.x = curr->ll_corner.x;
@@ -223,10 +260,10 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 			qtree[maxIndex+3] = c3;
 			qtree[maxIndex+4] = c4;
 			//printf("!\n");
-			curr->c1 = maxIndex+1;
-			curr->c2 = maxIndex+3;
-			curr->c3 = maxIndex+2;
-			curr->c4 = maxIndex+4;
+			curr->c1 = c1->index = maxIndex+1;
+			curr->c2 = c2->index = maxIndex+2;
+			curr->c3 = c3->index = maxIndex+3;
+			curr->c4 = c4->index = maxIndex+4;
 
 			maxIndex += 4;
 
@@ -367,6 +404,8 @@ void printBox(Box *b){
 	printf("ur_corner: [%f, %f]\n", b->ur_corner.x, b->ur_corner.y);
 	printf("perm_start: %d, perm_end: %d\n", b->perm_start, b->perm_end);
 	printf("check: %d\n", b->check);
+	printf("parent: %d\n", b->parent);
+	printf("index: %d\n", b->index);
 	printf("children: [%d, %d, %d, %d]\n", b->c1, b->c2, b->c3, b->c4);
 }
 
