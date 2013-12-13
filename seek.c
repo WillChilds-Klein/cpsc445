@@ -39,6 +39,7 @@ typedef struct box {
 } Box;
 
 void seek(double* a, int n, int k, int* iz);
+int circle_box_intersect(Point p, double radius, Box b);
 double gen_radius(Point p, Box *curr, Box **qtree);
 double furthest_corner_distance(Point p, Box b);
 void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, int k);
@@ -77,8 +78,8 @@ int main(){
 }
 
 void seek(double* a, int n, int k, int* iz){
-	int i, *qtreeSize, *perm, currIndex;
-	Box **qtree, *curr;
+	int i, j, *qtreeSize, *perm, currIndex, travIndex;
+	Box **qtree, *curr, **trav;
 	Point temp, *points, p;
 	double radius;
 
@@ -128,6 +129,35 @@ void seek(double* a, int n, int k, int* iz){
 		radius = gen_radius(p, curr, qtree);
 		printf("radius: %f\n", radius);
 
+		// init traversal array to all NULL ptrs
+		trav = calloc(*qtreeSize, sizeof(Box*));
+		travIndex = 1; // index of last element in trav + 1.
+		trav[0] = qtree[0];
+
+		// generate sparse arr with only ptrs to leaf's intsct w/ circle
+		for(j = 0; j < travIndex; j++){
+			//printf("build trav iter: %d\n", j);
+			if(trav[j]->c1 > -1){ // not a leaf
+				trav[travIndex] = qtree[trav[j]->c1];
+				trav[travIndex+1] = qtree[trav[j]->c2];
+				trav[travIndex+2] = qtree[trav[j]->c3];
+				trav[travIndex+3] = qtree[trav[j]->c4];
+				travIndex += 4;
+				trav[j] = NULL;
+			}
+			// if box and circle don't overlap, set current ptr to NULL
+			else if(!circle_box_intersect(p, radius, *(trav[j]))){
+				trav[j] = NULL;
+			}
+		}
+		printf("travIndex: %d, trav: [", travIndex);
+		for(j = 0; j < travIndex; j++){
+			if(trav[j])
+				printf("%d,", trav[j]->index);
+		}
+		printf("]\n");
+
+		free(trav);
 	}
 
 	// REMEMBER TO INCREMENT INDICES WHEN FINISHED DEVELOPING
@@ -137,6 +167,38 @@ void seek(double* a, int n, int k, int* iz){
 	}
 	free(qtree);
 	free(qtreeSize);
+}
+
+int circle_box_intersect(Point p, double r, Box b){
+	double ulDist, urDist, llDist, lrDist, maxDist;
+	Point ul_corner, lr_corner;
+
+	ul_corner.x = b.ll_corner.x;
+	ul_corner.y = b.ur_corner.y;
+	lr_corner.x = b.ur_corner.x;
+	lr_corner.y = b.ll_corner.y;
+
+	ulDist = pointDistance(p, ul_corner);
+	urDist = pointDistance(p, b.ur_corner);
+	llDist = pointDistance(p, b.ll_corner);
+	lrDist = pointDistance(p, lr_corner);
+
+	// case 1: >= 1 corner of b inside circle. 
+	if(fmax(ulDist, fmax(urDist, fmax(llDist, lrDist))) <= r){
+		return 1;
+	}
+	// case 2: no corners in circle, edge intersects w/ circle >= once
+	else if(((ul_corner.x <= p.x && p.x <= b.ur_corner.x) && (fabs(ul_corner.y - p.y) <= r)) ||
+		((b.ll_corner.x <= p.x && p.x <= lr_corner.x) && (fabs(b.ll_corner.y - p.y) <= r)) ||
+		((ul_corner.y >= p.y && p.y >= b.ll_corner.y) && (fabs(ul_corner.x - p.x) <= r)) ||
+		((b.ur_corner.y >= p.y && p.y >= lr_corner.y) && (fabs(b.ur_corner.x - p.x) <= r))){
+		printf("heyheyhey BOX: %d\n", b.index);
+		return 1;
+	}
+	// case 4: no cigar...not possible for circle in box.
+	else{
+		return 0;
+	}
 }
 
 double gen_radius(Point p, Box *curr, Box **qtree){

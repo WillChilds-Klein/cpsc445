@@ -1,0 +1,190 @@
+whooo out of big loop!
+boxes in array:
+
+ll_corner: [0.000000, 0.000000]
+ur_corner: [1.000000, 1.000000]
+perm_start: 0, perm_end: 12
+check: 1
+parent: 0
+index: 0
+children: [1, 2, 3, 4]
+
+ll_corner: [0.000000, 0.500000]
+ur_corner: [0.500000, 1.000000]
+perm_start: 0, perm_end: 2
+check: 1
+parent: 0
+index: 1
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.500000, 0.500000]
+ur_corner: [1.000000, 1.000000]
+perm_start: 2, perm_end: 6
+check: 1
+parent: 0
+index: 2
+children: [5, 6, 7, 8]
+
+ll_corner: [0.000000, 0.000000]
+ur_corner: [0.500000, 0.500000]
+perm_start: 6, perm_end: 11
+check: 1
+parent: 0
+index: 3
+children: [9, 10, 11, 12]
+
+ll_corner: [0.500000, 0.000000]
+ur_corner: [1.000000, 0.500000]
+perm_start: 11, perm_end: 12
+check: 1
+parent: 0
+index: 4
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.500000, 0.750000]
+ur_corner: [0.750000, 1.000000]
+perm_start: 2, perm_end: 2
+check: 1
+parent: 2
+index: 5
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.750000, 0.750000]
+ur_corner: [1.000000, 1.000000]
+perm_start: 2, perm_end: 6
+check: 1
+parent: 2
+index: 6
+children: [13, 14, 15, 16]
+
+ll_corner: [0.500000, 0.500000]
+ur_corner: [0.750000, 0.750000]
+perm_start: 6, perm_end: 6
+check: 1
+parent: 2
+index: 7
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.750000, 0.500000]
+ur_corner: [1.000000, 0.750000]
+perm_start: 6, perm_end: 6
+check: 1
+parent: 2
+index: 8
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.000000, 0.250000]
+ur_corner: [0.250000, 0.500000]
+perm_start: 6, perm_end: 6
+check: 1
+parent: 3
+index: 9
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.250000, 0.250000]
+ur_corner: [0.500000, 0.500000]
+perm_start: 6, perm_end: 9
+check: 1
+parent: 3
+index: 10
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.000000, 0.000000]
+ur_corner: [0.250000, 0.250000]
+perm_start: 9, perm_end: 11
+check: 1
+parent: 3
+index: 11
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.250000, 0.000000]
+ur_corner: [0.500000, 0.250000]
+perm_start: 11, perm_end: 11
+check: 1
+parent: 3
+index: 12
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.750000, 0.875000]
+ur_corner: [0.875000, 1.000000]
+perm_start: 2, perm_end: 2
+check: 1
+parent: 6
+index: 13
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.875000, 0.875000]
+ur_corner: [1.000000, 1.000000]
+perm_start: 2, perm_end: 4
+check: 1
+parent: 6
+index: 14
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.750000, 0.750000]
+ur_corner: [0.875000, 0.875000]
+perm_start: 4, perm_end: 6
+check: 1
+parent: 6
+index: 15
+children: [-1, -1, -1, -1]
+
+ll_corner: [0.875000, 0.750000]
+ur_corner: [1.000000, 0.875000]
+perm_start: 6, perm_end: 6
+check: 1
+parent: 6
+index: 16
+children: [-1, -1, -1, -1]
+
+
+Permutation Array:
+[7,10,4,11,5,8,1,2,9,0,3,6,]
+point 0 [0.200000, 0.200000] is in box at index 11 of qtree
+radius: 0.424264
+travIndex: 17, trav: [1,9,11,12,]
+point 1 [0.300000, 0.300000] is in box at index 10 of qtree
+radius: 0.424264
+travIndex: 17, trav: [1,9,10,12,]
+point 2 [0.450000, 0.450000] is in box at index 10 of qtree
+radius: 0.636396
+travIndex: 17, trav: [1,5,7,8,9,10,12,15,]
+point 3 [0.100000, 0.100000] is in box at index 11 of qtree
+radius: 0.565685
+travIndex: 17, trav: [1,9,11,12,]
+point 4 [0.900000, 0.900000] is in box at index 14 of qtree
+radius: 0.212132
+travIndex: 17, trav: [8,13,14,16,]
+point 5 [0.800000, 0.800000] is in box at index 15 of qtree
+radius: 0.282843
+travIndex: 17, trav: [8,13,15,16,]
+point 6 [0.700000, 0.300000] is in box at index 4 of qtree
+radius: 0.989949
+travIndex: 17, trav: [4,5,7,8,9,10,11,12,13,14,15,16,]
+point 7 [0.200000, 0.600000] is in box at index 1 of qtree
+radius: 1.000000
+travIndex: 17, trav: [1,5,7,8,9,10,11,12,13,14,15,16,]
+point 8 [0.850000, 0.850000] is in box at index 15 of qtree
+radius: 0.212132
+travIndex: 17, trav: [8,13,15,16,]
+point 9 [0.400000, 0.400000] is in box at index 10 of qtree
+radius: 0.565685
+travIndex: 17, trav: [1,7,9,10,12,]
+point 10 [0.500000, 0.500000] is in box at index 1 of qtree
+radius: 0.707107
+travIndex: 17, trav: [1,4,5,7,8,9,10,12,13,15,16,]
+point 11 [1.000000, 1.000000] is in box at index 14 of qtree
+radius: 0.353553
+travIndex: 17, trav: [8,13,14,16,]
+(1)[0.200000, 0.200000]: 0, 0, 0, 
+(2)[0.300000, 0.300000]: 0, 0, 0, 
+(3)[0.450000, 0.450000]: 0, 0, 0, 
+(4)[0.100000, 0.100000]: 0, 0, 0, 
+(5)[0.900000, 0.900000]: 0, 0, 0, 
+(6)[0.800000, 0.800000]: 0, 0, 0, 
+(7)[0.700000, 0.300000]: 0, 0, 0, 
+(8)[0.200000, 0.600000]: 0, 0, 0, 
+(9)[0.850000, 0.850000]: 0, 0, 0, 
+(10)[0.400000, 0.400000]: 0, 0, 0, 
+(11)[0.500000, 0.500000]: 0, 0, 0, 
+(12)[1.000000, 1.000000]: 0, 0, 0, 
