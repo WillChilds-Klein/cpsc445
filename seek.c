@@ -41,11 +41,12 @@ void seek(double* a, int n, int k, int* iz);
 int circle_box_intersect(Point p, double radius, Box b);
 double gen_radius(Point p, Box *curr, Box **qtree);
 double furthest_corner_distance(Point p, Box b);
-void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, int k);
+void build_tree(Point* points, Box*** qtree, int* qtreeSize, int* perm, int n, int k);
 void sort(int* perm, Point* points, int start, int end, int* indexes, Box c1, Box c2, Box c3, Box c4);
 int point_in_box(Point p, Box b);
 void printBox(Box *b);
 void printIntArr(int n, int *arr);
+void seek_naive2(double* a, int n, int k, int* iz);
 void seek_naive(double* a, int n, int k, int* iz);
 void insert(Point* arr, Point initial, Point test, int k);
 void initPointArr(Point* arr, int k);
@@ -55,48 +56,48 @@ double pointDistance(Point p, Point q);
 
 int main(){
 	int n, k, *iz, i, j;
-	double *a;
+	// double *a;
 
-	// double a[24] = {.2, .2, .3, .3, .45, .45, .1, .1, .9, .9, .8, .8, .7, .3, .2, .6, .85, .85, .4, .4, .5, .5, 1, 1};
+	double a[24] = {.2, .2, .3, .3, .45, .45, .1, .1, .9, .9, .8, .8, .7, .3, .2, .6, .85, .85, .4, .4, .5, .5, 1, 1};
 	// double a[40] = {.2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9, .2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9};
-	// n = 12;
-	n = 10000;
-	a = malloc((2*n) * sizeof(double));
+	n = 12;
+	// n = 10000;
+	// a = malloc((2*n) * sizeof(double));
 	k = 3;
 	iz = malloc(n*k * sizeof(int));
 
-	for(i = 0; i < 2*n; i++){
-		a[i] = ((double) rand() / (RAND_MAX));
-	}
+	// for(i = 0; i < 2*n; i++){
+	// 	a[i] = ((double) rand() / (RAND_MAX));
+	// }
 
 	seek(a, n, k, iz);
 
-	// for(i = 0; i < n; i++){
-	// 	printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
-	// 	for(j = 0; j < k; j++){
-	// 		printf("%d, ", iz[i*k+j]);
-	// 	}
-	// 	printf("\n");
-	// }printf("\n");
+	for(i = 0; i < n; i++){
+		printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
+		for(j = 0; j < k; j++){
+			printf("%d, ", iz[i*k+j]);
+		}
+		printf("\n");
+	}printf("\n");
 
-	// seek_naive(a, n, k, iz);
+	seek_naive(a, n, k, iz);
 
-	// for(i = 0; i < n; i++){
-	// 	printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
-	// 	for(j = 0; j < k; j++){
-	// 		printf("%d, ", iz[i*k+j]);
-	// 	}
-	// 	printf("\n");
-	// }
+	for(i = 0; i < n; i++){
+		printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
+		for(j = 0; j < k; j++){
+			printf("%d, ", iz[i*k+j]);
+		}
+		printf("\n");
+	}
 
 	free(iz);
-	free(a);
+	// free(a);
 	return 0;
 }
 
 void seek(double* a, int n, int k, int* iz){
 	int i, j, h, *qtreeSize, *perm, currIndex, travIndex, *mapping, *sub_iz, sub_n, sub_k, sub_aIndex;
-	double radius, *sub_a;
+	double radius, *sub_a, tempx, tempy;
 	Box **qtree, *curr, **trav;
 	Point temp, *points, p, *restricted_points;
 
@@ -117,9 +118,13 @@ void seek(double* a, int n, int k, int* iz){
 
 	// build quad tree
 	qtreeSize = malloc(sizeof(int));
-	*qtreeSize = 10000;
+	*qtreeSize = 100000;
 	qtree = calloc(*qtreeSize, sizeof(Box*));
-	build_tree(points, qtree, qtreeSize, perm, n, k);
+	build_tree(points, &qtree, qtreeSize, perm, n, k);
+
+	printf("qtreeSize: %d\n", *qtreeSize);
+	printf("quadtree built!\n");
+	printf("qtreeSize: %d\n", *qtreeSize);
 
 	// printf("perm:\n");
 	// printIntArr(n, perm);
@@ -199,6 +204,22 @@ void seek(double* a, int n, int k, int* iz){
 		// 	printf("%f,", sub_a[j]);
 		// }printf("]\n");
 
+		// comment out if using seek_naive.
+		// for(j = 0; j < 2*sub_n; j+=2){
+		// 	if(sub_a[j] == p.x && sub_a[j+1] == p.y){ // got it.
+		// 		tempx = sub_a[j];
+		// 		tempy = sub_a[j+1];
+		// 		sub_a[j] = sub_a[0];
+		// 		sub_a[j+1] = sub_a[1];
+		// 		sub_a[0] = tempx;
+		// 		sub_a[1] = tempy;
+		// 		break;
+		// 	}
+		// }
+
+		// call seek_naive2
+		// seek_naive2(sub_a, sub_n, k, sub_iz);
+
 		// call seek_naive
 		seek_naive(sub_a, sub_n, k, sub_iz);
 
@@ -212,7 +233,12 @@ void seek(double* a, int n, int k, int* iz){
 		// 	printf("%d,", mapping[j]);
 		// }printf("]\n");
 
-		// put pertinent part of sub_iz into iz.
+		// for seek_naive2
+				// for(h = 0; h < k; h++){
+				// 	iz[i*k+h] = mapping[sub_iz[h]-1];
+				// }
+
+		// put pertinent part of sub_iz into iz. for seek_naive
 		for(j = 0; j < 2*sub_n; j+=2){
 			if(sub_a[j] == p.x && sub_a[j+1] == p.y){ // got it.
 				for(h = 0; h < k; h++){
@@ -295,9 +321,9 @@ double gen_radius(Point p, Box *curr, Box **qtree){
 	return fmax(ulDist, fmax(urDist, fmax(llDist, lrDist)));
 }
 
-void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, int k){
+void build_tree(Point* points, Box*** qtree, int* qtreeSize, int* perm, int n, int k){
 	int i, currIndex, maxIndex, minIndex, numPointsInBox, *indexes;
-	Box *curr, *root;
+	Box *curr, *root, **temp;
 
 	// init root node
 	root = malloc(sizeof(Box));
@@ -310,7 +336,7 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 	root->parent = 0;
 	root->check = 0;
 	root->index = 0;
-	qtree[0] = root;
+	(*qtree)[0] = root;
 
 	currIndex = 0;
 	maxIndex = 0;
@@ -320,7 +346,13 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 	while(currIndex >= 0){
 		if(maxIndex > (*qtreeSize)-10){ // make qtree bigger if need be.
 			(*qtreeSize) *= 2;
-			qtree = (Box**) realloc(qtree, *qtreeSize);
+			temp = calloc(*qtreeSize, sizeof(Box*));
+			for(i = 0; i < maxIndex+4; i++){
+				temp[i] = (*qtree)[i];
+			}
+			free(*qtree);
+			*qtree = temp;
+			printf("realloc'd!!\n");
 		}
 
 		currIndex = -1;
@@ -328,9 +360,9 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 		// look if there are any unchecked boxes.
 		for(i = minIndex; i < maxIndex+1; i++){
 			minIndex = i; // UNCOMMENT FOR POTENTIAL SPEEDUP ALSO POTENTIAL BREAK+++++++++
-			if(qtree[i]->check == 0){
+			if((*qtree)[i]->check == 0){
 				currIndex = i;
-				curr = qtree[i];
+				curr = (*qtree)[i];
 				break;
 			}
 		}
@@ -393,10 +425,10 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 			c4->perm_end = indexes[4];//curr->perm_end;
 
 			//printf("%d %d\n", maxIndex, *qtreeSize);
-			qtree[maxIndex+1] = c1;
-			qtree[maxIndex+2] = c2;
-			qtree[maxIndex+3] = c3;
-			qtree[maxIndex+4] = c4;
+			(*qtree)[maxIndex+1] = c1;
+			(*qtree)[maxIndex+2] = c2;
+			(*qtree)[maxIndex+3] = c3;
+			(*qtree)[maxIndex+4] = c4;
 
 			curr->c1 = c1->index = maxIndex+1;
 			curr->c2 = c2->index = maxIndex+2;
@@ -607,6 +639,53 @@ void seek_naive(double* a, int n, int k, int* iz){
 
 	// put points back into iz
 	for(i = 0; i < k*n; i++){
+		iz[i] = (ret[i]).index;
+		iz[i]++; // increment because specs want index base 1. 
+	}
+
+	free(ret);
+	free(points);
+	return;	
+}
+
+void seek_naive2(double* a, int n, int k, int* iz){
+	int i, j;
+	Point temp, *points, *closest, *ret, initial, test;
+	ret = calloc(n*k, sizeof(Point));
+
+	// put points into structure that's easier to work with.
+	points = malloc(n * sizeof(Point));
+	for(i = 0; i < 2*n; i+=2){
+		temp.x = a[i];
+		temp.y = a[i+1];
+		temp.index = i/2;
+		points[i/2] = temp;
+	}
+
+	// for(i = 0; i < n; i++){
+	// 	printf("%d: [%f, %f]\n", points[i].index, points[i].x, points[i].y);
+	// }
+
+	// find closest points
+	i = 0;
+	//for(i = 0; i < n; i++){
+		closest = malloc(k * sizeof(Point));
+		initPointArr(closest, k);
+		initial = points[i];
+		for(j = 0; j < n; j++){
+			test = points[j];
+			if(!pointEquals(initial, test)){
+				insert(closest, initial, test, k);
+			}
+		}
+		// update ret.
+		for(j = 0; j < k; j++)
+			ret[i*k+j] = closest[j];
+		free(closest);
+	//}
+
+	// put points back into iz
+	for(i = 0; i < k; i++){
 		iz[i] = (ret[i]).index;
 		iz[i]++; // increment because specs want index base 1. 
 	}
