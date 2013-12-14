@@ -72,6 +72,9 @@ int main(){
 		printf("\n");
 	}
 	printf("\n");
+
+
+	iz = malloc(n*k * sizeof(int));
 	seek_naive(a, n, k, iz);
 
 	for(i = 0; i < n; i++){
@@ -87,7 +90,7 @@ int main(){
 }
 
 void seek(double* a, int n, int k, int* iz){
-	int i, j, h, *qtreeSize, *perm, currIndex, travIndex, *sub_iz, sub_n, sub_k, sub_aIndex;
+	int i, j, h, *qtreeSize, *perm, currIndex, travIndex, *mapping, *sub_iz, sub_n, sub_k, sub_aIndex;
 	double radius, *sub_a;
 	Box **qtree, *curr, **trav;
 	Point temp, *points, p, *restricted_points;
@@ -166,6 +169,7 @@ void seek(double* a, int n, int k, int* iz){
 		}printf("]\n");
 
 		// compile points from pertinent leafs
+		mapping = malloc(n * sizeof(int));
 		sub_n = 0;
 		sub_a = malloc(2*n * sizeof(double));
 		sub_aIndex = 0;
@@ -174,6 +178,7 @@ void seek(double* a, int n, int k, int* iz){
 				for(h = trav[j]->perm_start; h < trav[j]->perm_end; h++){
 					sub_a[sub_aIndex++] = points[perm[h]].x;
 					sub_a[sub_aIndex++] = points[perm[h]].y;
+					mapping[sub_n] = perm[h];
 					sub_n++;
 				}
 			}
@@ -186,11 +191,21 @@ void seek(double* a, int n, int k, int* iz){
 		// call seek_naive
 		seek_naive(sub_a, sub_n, k, sub_iz);
 
+		printf("sub_n: %d, sub_iz: [", sub_n);
+		for(j = 0; j < k*sub_n; j++){
+			printf("%d,", sub_iz[j]);
+		}printf("]\n");
+
+		printf("mapping: [");
+		for(j = 0; j < sub_n; j++){
+			printf("%d,", mapping[j]);
+		}printf("]\n");
+
 		// put pertinent part of sub_iz into iz.
 		for(j = 0; j < 2*sub_n; j+=2){
 			if(sub_a[j] == p.x && sub_a[j+1] == p.y){ // got it.
 				for(h = 0; h < k; h++){
-					iz[i*k+h] = sub_iz[(j/2)*k+h];
+					iz[i*k+h] = mapping[sub_iz[(j/2)*k+h]-1];
 				}
 				break;
 			}
@@ -199,9 +214,14 @@ void seek(double* a, int n, int k, int* iz){
 		free(trav);
 		free(sub_a);
 		free(sub_iz);
+		free(mapping);
 	}
 
 	// REMEMBER TO INCREMENT INDICES WHEN FINISHED DEVELOPING
+	for(i = 0; i < k*n; i++){
+		iz[i]++; // increment because specs want index base 1. IMPORTANT *********************************************
+	}
+
 	for(i = 0; i < *qtreeSize; i++){
 		if(qtree[i] != NULL)
 			free(qtree[i]);
