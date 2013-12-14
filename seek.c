@@ -57,10 +57,11 @@ int main(){
 	int n, k, *iz, i, j;
 	double *a;
 
-	//double a[24] = {.2, .2, .3, .3, .45, .45, .1, .1, .9, .9, .8, .8, .7, .3, .2, .6, .85, .85, .4, .4, .5, .5, 1, 1};
+	// double a[24] = {.2, .2, .3, .3, .45, .45, .1, .1, .9, .9, .8, .8, .7, .3, .2, .6, .85, .85, .4, .4, .5, .5, 1, 1};
+	// double a[40] = {.2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9, .2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9};
 	// n = 12;
-	a = malloc((2*n+1000000) * sizeof(double));
-	n = 1000000;
+	n = 10000;
+	a = malloc((2*n) * sizeof(double));
 	k = 3;
 	iz = malloc(n*k * sizeof(int));
 
@@ -70,13 +71,23 @@ int main(){
 
 	seek(a, n, k, iz);
 
-	for(i = 0; i < n; i++){
-		printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
-		for(j = 0; j < k; j++){
-			printf("%d, ", iz[i*k+j]);
-		}
-		printf("\n");
-	}
+	// for(i = 0; i < n; i++){
+	// 	printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
+	// 	for(j = 0; j < k; j++){
+	// 		printf("%d, ", iz[i*k+j]);
+	// 	}
+	// 	printf("\n");
+	// }printf("\n");
+
+	// seek_naive(a, n, k, iz);
+
+	// for(i = 0; i < n; i++){
+	// 	printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
+	// 	for(j = 0; j < k; j++){
+	// 		printf("%d, ", iz[i*k+j]);
+	// 	}
+	// 	printf("\n");
+	// }
 
 	free(iz);
 	free(a);
@@ -106,9 +117,12 @@ void seek(double* a, int n, int k, int* iz){
 
 	// build quad tree
 	qtreeSize = malloc(sizeof(int));
-	*qtreeSize = 5000;
+	*qtreeSize = 10000;
 	qtree = calloc(*qtreeSize, sizeof(Box*));
 	build_tree(points, qtree, qtreeSize, perm, n, k);
+
+	// printf("perm:\n");
+	// printIntArr(n, perm);
 
 	// traverse quad tree for each point.
 	for(i = 0; i < n; i++){
@@ -171,8 +185,8 @@ void seek(double* a, int n, int k, int* iz){
 		for(j = 0; j < travIndex; j++){
 			if(trav[j]){
 				for(h = trav[j]->perm_start; h < trav[j]->perm_end; h++){
-					sub_a[sub_aIndex++] = points[perm[h]].x;
-					sub_a[sub_aIndex++] = points[perm[h]].y;
+					sub_a[sub_aIndex++] = (points[perm[h]]).x;
+					sub_a[sub_aIndex++] = (points[perm[h]]).y; // breaks at 16
 					mapping[sub_n] = perm[h];
 					sub_n++;
 				}
@@ -212,6 +226,7 @@ void seek(double* a, int n, int k, int* iz){
 		free(sub_a);
 		free(sub_iz);
 		free(mapping);
+		//printf("\n");
 	}
 
 	// REMEMBER TO INCREMENT INDICES WHEN FINISHED DEVELOPING
@@ -225,6 +240,8 @@ void seek(double* a, int n, int k, int* iz){
 	}
 	free(qtree);
 	free(qtreeSize);
+	free(perm);
+	free(points);
 }
 
 int circle_box_intersect(Point p, double r, Box b){
@@ -299,7 +316,6 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 	maxIndex = 0;
 	minIndex = 0; // keep at zero now, but find way to make dynamic to get speed-up.
 
-	int incr = 7;
 
 	while(currIndex >= 0){
 		if(maxIndex > (*qtreeSize)-10){ // make qtree bigger if need be.
@@ -360,7 +376,11 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 			c4->ur_corner.y = curr->ll_corner.y+((curr->ur_corner.y - curr->ll_corner.y)/2);
 
 			indexes = calloc(5, sizeof(int));
+			// printf("before:\n");
+			// printIntArr(n, perm);
 			sort(perm, points, curr->perm_start, curr->perm_end, indexes, *c1, *c2, *c3, *c4);
+			// printf("after:\n");
+			// printIntArr(n, perm);
 
 			// assign children start and end indexes in perm array
 			c1->perm_start = indexes[0];
@@ -418,8 +438,11 @@ void build_tree(Point* points, Box** qtree, int* qtreeSize, int* perm, int n, in
 // indexes[0] is start of c1, indexes[1] start of c2, [2] start c3 etc
 // points ll and ur gives dimensions of box to split into children and sort.
 void sort(int* perm, Point* points, int start, int end, int* indexes, Box c1, Box c2, Box c3, Box c4){
-	int *c1_arr, *c2_arr, *c3_arr, *c4_arr, c1ind, c2ind, c3ind, c4ind, i, indSum, last;
+	int *c1_arr, *c2_arr, *c3_arr, *c4_arr, c1ind, c2ind, c3ind, c4ind, i, indSum;
 	c1ind = c2ind = c3ind = c4ind = 0;
+
+	// printf("start: %d\n", start);
+	// printf("end: %d\n", end);
 
 	// printf("start: %d, end: %d\n", start, end);
 	// 	printf("perm arr\n");
@@ -434,31 +457,45 @@ void sort(int* perm, Point* points, int start, int end, int* indexes, Box c1, Bo
 		// need else if's otherwise pts included twice.
 		if(point_in_box(points[perm[i]], c1)){
 			c1_arr[c1ind++] = perm[i];
-			last = 1;
 		}
 		else if(point_in_box(points[perm[i]], c2)){
 			c2_arr[c2ind++] = perm[i];
-			last = 2;
 		}
 		else if(point_in_box(points[perm[i]], c3)){
 			c3_arr[c3ind++] = perm[i];
-			last = 3;
 		}
 		else if(point_in_box(points[perm[i]], c4)){
 			c4_arr[c4ind++] = perm[i];
-			last = 4;
 		}
 		else{
-			// case for border?
+			printf("WHOA THERE THE SORT FUNCTION FUCKED UP!\n");
+			exit(1);
 		}
 	}
 
-	i = indexes[0] = start;
+	// printf("c1_arr: [");
+	// for(i = 0; i < c1ind; i++){
+	// 	printf("%d,", c1_arr[i]);
+	// }printf("]\n");
+	// printf("c2_arr: [");
+	// for(i = 0; i < c2ind; i++){
+	// 	printf("%d,", c2_arr[i]);
+	// }printf("]\n");
+	// printf("c3_arr: [");
+	// for(i = 0; i < c3ind; i++){
+	// 	printf("%d,", c3_arr[i]);
+	// }printf("]\n");
+	// printf("c4_arr: [");
+	// for(i = 0; i < c4ind; i++){
+	// 	printf("%d,", c4_arr[i]);
+	// }printf("]\n");
+
+	indexes[0] = i = start;
 	indSum = start;
 	if(c1ind > 0){
 		indSum += c1ind;
 		for(; i < indSum; i++)
-			perm[i] = c1_arr[i];
+			perm[i] = c1_arr[i-start];
 	}
 
 	indexes[1] = i; 
@@ -575,6 +612,7 @@ void seek_naive(double* a, int n, int k, int* iz){
 	}
 
 	free(ret);
+	free(points);
 	return;	
 }
 
