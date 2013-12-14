@@ -1,4 +1,3 @@
-//#include <quaplot.c>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,16 +71,26 @@ int main(){
 		}
 		printf("\n");
 	}
+	printf("\n");
+	seek_naive(a, n, k, iz);
+
+	for(i = 0; i < n; i++){
+		printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
+		for(j = 0; j < k; j++){
+			printf("%d, ", iz[i*k+j]);
+		}
+		printf("\n");
+	}
 
 	free(iz);
 	return 0;
 }
 
 void seek(double* a, int n, int k, int* iz){
-	int i, j, *qtreeSize, *perm, currIndex, travIndex;
+	int i, j, h, *qtreeSize, *perm, currIndex, travIndex, *sub_iz, sub_n, sub_k, sub_aIndex;
+	double radius, *sub_a;
 	Box **qtree, *curr, **trav;
-	Point temp, *points, p;
-	double radius;
+	Point temp, *points, p, *restricted_points;
 
 	// make points easier to work with.
 	points = malloc(n * sizeof(Point));
@@ -154,10 +163,42 @@ void seek(double* a, int n, int k, int* iz){
 		for(j = 0; j < travIndex; j++){
 			if(trav[j])
 				printf("%d,", trav[j]->index);
+		}printf("]\n");
+
+		// compile points from pertinent leafs
+		sub_n = 0;
+		sub_a = malloc(2*n * sizeof(double));
+		sub_aIndex = 0;
+		for(j = 0; j < travIndex; j++){
+			if(trav[j]){
+				for(h = trav[j]->perm_start; h < trav[j]->perm_end; h++){
+					sub_a[sub_aIndex++] = points[perm[h]].x;
+					sub_a[sub_aIndex++] = points[perm[h]].y;
+					sub_n++;
+				}
+			}
 		}
-		printf("]\n");
+		sub_iz = malloc(sub_n*k * sizeof(int));
+		printf("sub_n: %d, sub_a: [", sub_n);
+		for(j = 0; j < 2*sub_n; j++){
+			printf("%f,", sub_a[j]);
+		}printf("]\n");
+		// call seek_naive
+		seek_naive(sub_a, sub_n, k, sub_iz);
+
+		// put pertinent part of sub_iz into iz.
+		for(j = 0; j < 2*sub_n; j+=2){
+			if(sub_a[j] == p.x && sub_a[j+1] == p.y){ // got it.
+				for(h = 0; h < k; h++){
+					iz[i*k+h] = sub_iz[(j/2)*k+h];
+				}
+				break;
+			}
+		}
 
 		free(trav);
+		free(sub_a);
+		free(sub_iz);
 	}
 
 	// REMEMBER TO INCREMENT INDICES WHEN FINISHED DEVELOPING
@@ -520,7 +561,7 @@ void seek_naive(double* a, int n, int k, int* iz){
 	// put points back into iz
 	for(i = 0; i < k*n; i++){
 		iz[i] = (ret[i]).index;
-		//iz[i]++; // increment because specs want index base 1. IMPORTANT *********************************************
+		iz[i]++; // increment because specs want index base 1. IMPORTANT *********************************************
 	}
 
 	free(ret);
