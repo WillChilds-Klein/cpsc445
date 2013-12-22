@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <time.h>
 
 #define INT_MAX (pow(2, 64))
 #define REALLY_BIG_NUMBER (1000000)
@@ -171,6 +172,8 @@ void seek(double* a, int n, int k, int* iz){
 			}
 		}
 		sub_iz = malloc(sub_n*k * sizeof(int));
+
+		// printf("n = %d\n", sub_n);
 
 		seek_naive(sub_a, sub_n, k, sub_iz);
 
@@ -612,43 +615,70 @@ double distance(double x1, double y1, double x2, double y2){
 	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
-// int main(){
-// 	int n, k, *iz, i, j;
-// 	// double *a;
+int main(){
+	int n, k, *iz, i, j;
+	double *a;
 
-// 	double a[24] = {.2, .2, .3, .3, .45, .45, .1, .1, .9, .9, .8, .8, .7, .3, .2, .6, .85, .85, .4, .4, .5, .5, 1, 1};
-// 	// double a[40] = {.2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9, .2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9};
-// 	n = 12;
-// 	//n = 10000;
-// 	//a = malloc((2*n) * sizeof(double));
-// 	k = 3;
-// 	iz = malloc(n*k * sizeof(int));
+	time_t pre_seek, post_seek, pre_seek_naive, post_seek_naive;
 
-// 	// for(i = 0; i < 2*n; i++){
-// 	// 	a[i] = ((double) rand() / (RAND_MAX));
-// 	// }
+	double small_a[24] = {.2, .2, .3, .3, .45, .45, .1, .1, .9, .9, .8, .8, .7, .3, .2, .6, .85, .85, .4, .4, .5, .5, 1, 1};
+	// double a[40] = {.2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9, .2, .3, .4, .5, .6, .7, .8, .9, .1, 1, 1, 1, .3, .6, .3, .7, .2, .8, .4, .9};
+	n = 12;
+	k = 3;
+	iz = malloc(n*k * sizeof(int));
 
-// 	seek(a, n, k, iz);
+	for(i = 0; i < 2*n; i++){
+		small_a[i] = ((double) rand() / (RAND_MAX));
+	}
+	
+	seek(small_a, n, k, iz);
 
-// 	for(i = 0; i < n; i++){
-// 		printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
-// 		for(j = 0; j < k; j++){
-// 			printf("%d, ", iz[i*k+j]);
-// 		}
-// 		printf("\n");
-// 	}printf("\n");
+	for(i = 0; i < n; i++){
+		printf("(%d)[%f, %f]: ", i+1, small_a[2*i], small_a[2*i+1]);
+		for(j = 0; j < k; j++){
+			printf("%d, ", iz[i*k+j]);
+		}
+		printf("\n");
+	}printf("\n");
 
-// 	seek_naive(a, n, k, iz);
+	seek_naive(small_a, n, k, iz);
 
-// 	for(i = 0; i < n; i++){
-// 		printf("(%d)[%f, %f]: ", i+1, a[2*i], a[2*i+1]);
-// 		for(j = 0; j < k; j++){
-// 			printf("%d, ", iz[i*k+j]);
-// 		}
-// 		printf("\n");
-// 	}
+	for(i = 0; i < n; i++){
+		printf("(%d)[%f, %f]: ", i+1, small_a[2*i], small_a[2*i+1]);
+		for(j = 0; j < k; j++){
+			printf("%d, ", iz[i*k+j]);
+		}
+		printf("\n");
+	}
 
-// 	free(iz);
-// 	// free(a);
-// 	return 0;
-// }
+	free(iz);
+
+	for(n = 10; n <= 100000; n *= 10){
+		a = malloc((2*n) * sizeof(double));
+		k = 3;
+		iz = malloc(n*k * sizeof(int));
+
+		for(i = 0; i < 2*n; i++){
+			a[i] = ((double) rand() / (RAND_MAX));
+		}
+
+		pre_seek = clock();
+		seek(a, n, k, iz);
+		post_seek = clock();
+
+		pre_seek_naive = clock();
+		seek_naive(a, n, k, iz);
+		post_seek_naive = clock();
+
+		printf("for n = %d\n", n);
+		printf("seek: %f\n", difftime(post_seek, pre_seek));
+		printf("seek_naive: %f\n", difftime(post_seek_naive, pre_seek_naive));
+		printf("ratio seek:seek_naive = %f\n", difftime(post_seek, pre_seek)/difftime(post_seek_naive, pre_seek_naive));
+		printf("\n");
+
+		free(iz);
+		free(a);
+	}
+
+	return 0;
+}
