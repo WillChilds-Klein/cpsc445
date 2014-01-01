@@ -200,44 +200,44 @@ void flatPrint(int n, double* flat){
 	return;
 }
 
-// int main(){
-// 	double **a, *y, eps, *x, *discreps;
-// 	int n, numit, *niter, i, k;
+int main(){
+	double **a, *y, eps, *x, *discreps;
+	int n, numit, *niter, i, k;
 
-// 	eps = pow(10, -6);
-// 	numit = 1000;
-// 	discreps = calloc(numit, sizeof(double));
-// 	niter = malloc(sizeof(int));
+	eps = pow(10, -6);
+	numit = 1000;
+	discreps = calloc(numit, sizeof(double));
+	niter = malloc(sizeof(int));
 
-// 	int sizes[] = {3, 4, 6, 10};
+	int sizes[] = {3, 4, 6, 10};
 
-// 	for(k = 0; k < 4; k++){
-// 		int n = sizes[k];
-// 		printf("n = %d\n", n);
-// 		a = matrixCreate(n);
-// 		for(i = 0; i < n; i++){
-// 			a[i][i] = 1 / pow((i+1), 2);
-// 		}
-// 		y = malloc(n * sizeof(double));
-// 		for(i = 0; i < n; i++){
-// 			y[i] = 1;
-// 		}
-// 		printf("original a:\n");
-// 		matrixPrint(n, a);
-// 		printf("original y:\n");
-// 		flatPrint(n, y);
-// 		x = malloc(n * sizeof(double));
-// 		dumb_solve(matrixFlatten(n, a), y, n, eps, numit, x, niter, discreps);
-// 		printf("final x:\n");
-// 		flatPrint(n, x);
-// 		printf("niter: %d\n", *niter);
-// 		printf("discreps: ");
-// 		flatPrint(n, discreps);
-// 		printf("\n");
-// 	}
+	for(k = 0; k < 4; k++){
+		int n = sizes[k];
+		printf("n = %d\n", n);
+		a = matrixCreate(n);
+		for(i = 0; i < n; i++){
+			a[i][i] = 1 / pow((i+1), 2);
+		}
+		y = malloc(n * sizeof(double));
+		for(i = 0; i < n; i++){
+			y[i] = 1;
+		}
+		printf("original a:\n");
+		matrixPrint(n, a);
+		printf("original y:\n");
+		flatPrint(n, y);
+		x = malloc(n * sizeof(double));
+		dumb_solve(matrixFlatten(n, a), y, n, eps, numit, x, niter, discreps);
+		printf("final x:\n");
+		flatPrint(n, x);
+		printf("niter: %d\n", *niter);
+		printf("discreps: ");
+		flatPrint(n, discreps);
+		printf("\n");
+	}
 
-// 	return 0;
-// }
+	return 0;
+}
 
 // OUTPUT!!
 

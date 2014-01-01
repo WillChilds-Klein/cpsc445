@@ -85,6 +85,8 @@ int pointEquals(Point p, Point q);
 double distance(double x1, double y1, double x2, double y2);
 double pointDistance(Point p, Point q);
 
+void seek_helper(Point *a, int n, int start,  int end, const int k, int *iz, double *n_dist, int pos);
+
 void seek(double* a, int n, int k, int* iz){
 	int i, j, h, *qtreeSize, *perm, currIndex, travIndex, *mapping, *sub_iz, sub_n, sub_k, sub_aIndex;
 	double radius, *sub_a, tempx, tempy;
@@ -478,48 +480,134 @@ void printIntArr(int n, int *arr){
 	return;
 }
 
-// call within seek function?
-void seek_naive(double* a, int n, int k, int* iz){
-	int i, j;
-	Point temp, *points, *closest, *ret, initial, test;
-	ret = calloc(n*k, sizeof(Point));
+// Aayush's...
+void seek_naive(double *a, int n, int k, int *iz) {
 
-	// put points into structure that's easier to work with.
-	points = malloc(n * sizeof(Point));
-	for(i = 0; i < 2*n; i+=2){
-		temp.x = a[i];
-		temp.y = a[i+1];
-		temp.index = i/2;
-		points[i/2] = temp;
-	}
+  Point *pt_arr = malloc(sizeof(Point)*n);
+  int i, j, pe = 0;
+  double n_dist[k];
 
-	// find closest points
-	for(i = 0; i < n; i++){
-		closest = malloc(k * sizeof(Point));
-		initPointArr(closest, k);
-		initial = points[i];
-		for(j = 0; j < n; j++){
-			test = points[j];
-			if(!pointEquals(initial, test)){
-				insert(closest, initial, test, k);
-			}
-		}
-		// update ret.
-		for(j = 0; j < k; j++)
-			ret[i*k+j] = closest[j];
-		free(closest);
-	}
+  // build up the array of points
+  for (i = 0; i < n; i++) {
+      pt_arr[i].x = a[2*i];
+      pt_arr[i].y = a[2*i+1];
+      pt_arr[i].index = i;
+  }
+  for (i = 0; i < n; i++) { 
+    //initialize neighbors and distances to -1.0
+    memset(n_dist, 0.0, k*sizeof(double));
 
-	// put points back into iz
-	for(i = 0; i < k*n; i++){
-		iz[i] = (ret[i]).index;
-		iz[i]++; // increment because specs want index base 1. 
-	}
+    pe += n; //points examined, just for debugging
+    seek_helper(pt_arr, n, 0, n, k, iz, n_dist, i);
 
-	free(ret);
-	free(points);
-	return;	
+    //keep em ordered for testing
+    //qsort(&iz[k*i], k, sizeof(int), compare);
+  }
 }
+
+/*
+ * a = array of neighbor points
+ * n = number of points in the array
+ * start = where to start looking
+ * end = where to stop looking
+ * k = neighbor size
+ * iz = results
+ * pos = which point to consider in a
+ */
+void seek_helper(Point *a, int n, int start,  int end, const int k, int *iz, double *n_dist, int pos) {
+
+    int i,j,z, c_index = 0, id = 0, curr_id = 0;
+    double x1=0,y1=0, x2=0, y2=0; 
+    double dist = 0.0, cand_dist = 0.0;
+
+    //current point
+    x1 = a[pos].x, y1 = a[pos].y, curr_id = a[pos].index;
+    //printf("point is (%f, %f)\n", x1, y1);
+
+    //printf("currently examining %f, %f\n", x1, y1);
+
+    for (j = start; j < end; j++) {
+        //current neighbor
+        x2 = a[j].x, y2=a[j].y, id = a[j].index;
+        //this is us
+        if (id == curr_id)
+            continue;
+     //   printf("current neighbor %f, %f, id:%d\n", x2, y2, id);
+
+        //get the distance
+        dist = distance(x1,y1,x2,y2);
+      //  printf("distance %f\n", dist);
+
+        //this is the index we want to swap with our curr_point
+        c_index = -1;
+
+        //loop through, find the furthest away point, replace w/ us
+        for (z = 0; z < k; z++) {
+
+            if (!n_dist[z]) { //nothing here, so update and leave 
+                c_index = z; 
+                break;
+            }
+
+            //we're closer than this guy 
+            if (dist < n_dist[z]) {
+
+                //AND this point is bigger than our prev point
+                if (c_index == -1 || n_dist[c_index] < n_dist[z])
+                    c_index = z;
+                  //  printf("YUP, it's closer\n");
+            }
+        }
+
+        if (c_index != -1) {
+          iz[k*curr_id+c_index] = id;
+          n_dist[c_index] = dist;
+        }
+    }
+}
+
+// call within seek function?
+// void seek_naive(double* a, int n, int k, int* iz){
+// 	int i, j;
+// 	Point temp, *points, *closest, *ret, initial, test;
+// 	ret = calloc(n*k, sizeof(Point));
+
+// 	// put points into structure that's easier to work with.
+// 	points = malloc(n * sizeof(Point));
+// 	for(i = 0; i < 2*n; i+=2){
+// 		temp.x = a[i];
+// 		temp.y = a[i+1];
+// 		temp.index = i/2;
+// 		points[i/2] = temp;
+// 	}
+
+// 	// find closest points
+// 	for(i = 0; i < n; i++){
+// 		closest = malloc(k * sizeof(Point));
+// 		initPointArr(closest, k);
+// 		initial = points[i];
+// 		for(j = 0; j < n; j++){
+// 			test = points[j];
+// 			if(!pointEquals(initial, test)){
+// 				insert(closest, initial, test, k);
+// 			}
+// 		}
+// 		// update ret.
+// 		for(j = 0; j < k; j++)
+// 			ret[i*k+j] = closest[j];
+// 		free(closest);
+// 	}
+
+// 	// put points back into iz
+// 	for(i = 0; i < k*n; i++){
+// 		iz[i] = (ret[i]).index;
+// 		iz[i]++; // increment because specs want index base 1. 
+// 	}
+
+// 	free(ret);
+// 	free(points);
+// 	return;	
+// }
 
 void seek_naive2(double* a, int n, int k, int* iz){
 	int i, j;
