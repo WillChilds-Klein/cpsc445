@@ -86,6 +86,8 @@ double distance(double x1, double y1, double x2, double y2);
 double pointDistance(Point p, Point q);
 
 void seek_helper(Point *a, int n, int start,  int end, const int k, int *iz, double *n_dist, int pos);
+time_t tree_built;
+int (*cmp)(const void *keyval, const void *datum);
 
 void seek(double* a, int n, int k, int* iz){
 	int i, j, h, *qtreeSize, *perm, currIndex, travIndex, *mapping, *sub_iz, sub_n, sub_k, sub_aIndex;
@@ -113,6 +115,9 @@ void seek(double* a, int n, int k, int* iz){
 	*qtreeSize = 100000;
 	qtree = calloc(*qtreeSize, sizeof(Box*));
 	build_tree(points, &qtree, qtreeSize, perm, n, k);
+
+	// deeeleeetteee
+	tree_built = clock();
 
 	// traverse quad tree for each point.
 	for(i = 0; i < n; i++){
@@ -501,8 +506,17 @@ void seek_naive(double *a, int n, int k, int *iz) {
     seek_helper(pt_arr, n, 0, n, k, iz, n_dist, i);
 
     //keep em ordered for testing
-    //qsort(&iz[k*i], k, sizeof(int), compare);
+    qsort(&iz[k*i], k, sizeof(int), cmp);
   }
+}
+
+int (*cmp)(const void *keyval, const void *datum){
+	if(*keyval < *datum)
+		return -1;
+	else if(*keyval > *datum)
+		return 1;
+	else
+		return 0;
 }
 
 /*
@@ -759,9 +773,10 @@ int main(){
 		post_seek_naive = clock();
 
 		printf("for n = %d\n", n);
-		printf("seek: %f\n", difftime(post_seek, pre_seek));
-		printf("seek_naive: %f\n", difftime(post_seek_naive, pre_seek_naive));
-		printf("ratio seek:seek_naive = %f\n", difftime(post_seek, pre_seek)/difftime(post_seek_naive, pre_seek_naive));
+		printf("seek: %f\n", difftime(post_seek, pre_seek)/1000000);
+		printf("seek_naive: %f\n", difftime(post_seek_naive, pre_seek_naive)/1000000);
+		printf("ratio seek/seek_naive = %f\n", difftime(post_seek, pre_seek) / difftime(post_seek_naive, pre_seek_naive));
+		printf("tree built in %f seconds\n", difftime(tree_built, pre_seek)/1000000);
 		printf("\n");
 
 		free(iz);

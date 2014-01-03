@@ -24,7 +24,7 @@ void flatPrint(int n, double* flat);
 
 void dumb_solve(double* a, double* y, int n, double eps, int numit, double* x, int* niter, double* discreps){
 
-	double **A, *xCurr, *xNext, gamma, *grad;
+	double **A, *xCurr, *xNext, gamma, *grad, *tempVec1, *tempVec2;
 	int i;
 
 	A = matrixExpand(n, a);
@@ -33,29 +33,61 @@ void dumb_solve(double* a, double* y, int n, double eps, int numit, double* x, i
 	*niter = 0;
 
 	do{
-		if(*niter > 0 && discreps[(*niter)-1] < eps)
+		if(*niter > 0 && discreps[(*niter)-1] < eps) // converged.
 			break;
-		grad = gradient(n, A, xCurr, y);
-		matrixExpand(n, a);
+
+		grad = gradient(n, A, xCurr, y);\
 		gamma = calculateGamma(n, A, grad);
-		xNext = vectorAdd(n, xCurr, vectorScale(n, grad, -1*gamma)); // make gradient negative
+
+		tempVec1 = xNext;
+		tempVec2 = vectorScale(n, grad, -1*gamma); // make gradient negative
+		xNext = vectorAdd(n, xCurr, tempVec2); // find next guess for x
+		free(tempVec1);
+		free(tempVec2);
+
 		discreps[*niter] = pow(vectorMagnitude(n, grad), 2);
 		xCurr = xNext;
+
+		free(grad);
+		free(xNext);
 	}while((*niter)++ < numit);
 
 	for(i = 0; i < n; i++){
 		x[i] = xCurr[i];
 	}
+
+	free(xCurr);
+	for(i = 0; i < n; i++)
+		free(A[i]);
+	free(A);
 }
 
+// calculates gradient vector of matrix A.
 double* gradient(int n, double** A, double* x, double* y){
-	double* right = vectorAdd(n, matrixVectorMultiply(n, A, x), vectorScale(n, y, -1));
-	double* left = matrixVectorMultiply(n, matrixTranspose(n, A), right);
-	return vectorScale(n, left, 2);
+	double *left, *right, *grad, *tempVec1, *tempVec2, **transp;
+
+	tempVec1 = matrixVectorMultiply(n, A, x);
+	tempVec2 = vectorScale(n, y, -1);
+	right = vectorAdd(n, tempVec1, tempVec2);
+	free(tempVec1);
+	free(tempVec2);
+
+	transp = matrixTranspose(n, A);
+	left = matrixVectorMultiply(n, transp, right);
+
+	grad = vectorScale(n, left, 2);
+	free(right);
+	free(left);
+
+	return grad;
 }
 
 double calculateGamma(int n, double** A, double* grad){
-	return pow(vectorMagnitude(n, grad), 2) / (2 * pow(vectorMagnitude(n, matrixVectorMultiply(n, A, grad)), 2));
+	double *temp, gamma;
+	temp = matrixVectorMultiply(n, A, grad);
+	gamma = pow(vectorMagnitude(n, grad), 2) / (2 * pow(vectorMagnitude(n, temp), 2));
+	free(temp);
+	return gamma;
 }
 
 double vectorMagnitude(int n, double* v){
@@ -99,36 +131,36 @@ double* matrixVectorMultiply(int n, double** m, double* v){
 	return ret;
 }
 
-double** matrixScale(int n, double** m, double c){
-	double** ret = matrixCreate(n);
-	int i, j;
-	for(i = 0; i < n; i++){
-		for(j = 0; j < n; j++){
-			ret[i][j] = m[i][j] * c;
-		}
-	}
-	return ret;
-}
+// double** matrixScale(int n, double** m, double c){
+// 	double** ret = matrixCreate(n);
+// 	int i, j;
+// 	for(i = 0; i < n; i++){
+// 		for(j = 0; j < n; j++){
+// 			ret[i][j] = m[i][j] * c;
+// 		}
+// 	}
+// 	return ret;
+// }
 
 // multiplies 2 n x n matrices left and right, returns L*R as newly 
 // malloc'd n x n matrix.
 // CAUTION: does not free memory, so make sure that that's taken care
 // of externally. This is a potential source for a HUGE memory leak.
-double** matrixMultiply(int n, double** left, double** right){
-	int i, j, k;
-	double vectorSum;
-	double** matrix = matrixCreate(n);
-	for(i = 0; i < n; i++){
-		for(j = 0; j < n; j++){
-			vectorSum = 0;
-			for(k = 0; k < n; k++){
-				vectorSum += left[i][k] * right[k][j];
-			}
-			matrix[i][j] = vectorSum;
-		}
-	}
-	return matrix;
-}
+// double** matrixMultiply(int n, double** left, double** right){
+// 	int i, j, k;
+// 	double vectorSum;
+// 	double** matrix = matrixCreate(n);
+// 	for(i = 0; i < n; i++){
+// 		for(j = 0; j < n; j++){
+// 			vectorSum = 0;
+// 			for(k = 0; k < n; k++){
+// 				vectorSum += left[i][k] * right[k][j];
+// 			}
+// 			matrix[i][j] = vectorSum;
+// 		}
+// 	}
+// 	return matrix;
+// }
 
 double** matrixTranspose(int n, double** matrix){
 	double** transpose = matrixCreate(n);
