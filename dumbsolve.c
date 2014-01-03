@@ -1,3 +1,24 @@
+/****************************dumbsolve.c***************************************
+
+						Will Childs-Klein
+
+	dumbsolve is an implementation of the steepest descent method for
+	solving linear systems. Steepest descent is advantageous because
+	although it does not completely converge quickly, in general, it
+	quickly approaches convergence. This means that this is an efficient
+	algorithm to use when solving many things at scale, where a quick-and-
+	dirty approximation of values is sufficient, and needs to be aquired 
+	quickly. The parameter double *a represents the coefficients of the 
+	system, y is a vector of the solutions, n is the size of the system, 
+	eps is the relative accuracy to which the solution is to be solved, 
+	numit is the maximum number of iterations to be allowed, x is a return 
+	parameter which holds are solution vector, niter is also a return 
+	parameter which holds the number of iterations performed, and discreps 
+	is a vector of length niter which holds the discrepancies between the x
+	vector between iterations.
+
+******************************************************************************/
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -24,33 +45,38 @@ void flatPrint(int n, double* flat);
 
 void dumb_solve(double* a, double* y, int n, double eps, int numit, double* x, int* niter, double* discreps){
 
-	double **A, *xCurr, *xNext, gamma, *grad, *tempVec1, *tempVec2;
+	double **A, *xCurr, *xNext, gamma, *grad, *tempVec1, *tempVec2, *tempVec3;
 	int i;
 
 	A = matrixExpand(n, a);
 
-	xCurr = malloc(n * sizeof(double));
+	xCurr = calloc(n, sizeof(double));
 	*niter = 0;
 
 	do{
 		if(*niter > 0 && discreps[(*niter)-1] < eps) // converged.
 			break;
 
-		grad = gradient(n, A, xCurr, y);\
+		grad = gradient(n, A, xCurr, y);
 		gamma = calculateGamma(n, A, grad);
 
-		tempVec1 = xNext;
-		tempVec2 = vectorScale(n, grad, -1*gamma); // make gradient negative
-		xNext = vectorAdd(n, xCurr, tempVec2); // find next guess for x
+		tempVec1 = vectorScale(n, grad, -1*gamma); // make gradient negative
+		xNext = vectorAdd(n, xCurr, tempVec1); // find next guess for x
+		free(tempVec1);
+
+		tempVec1 = matrixVectorMultiply(n, A, xNext);
+		tempVec2 = vectorScale(n, y, -1);
+		tempVec3 = vectorAdd(n, tempVec1, tempVec2);
+		discreps[*niter] = pow(vectorMagnitude(n, tempVec3), 2);
 		free(tempVec1);
 		free(tempVec2);
-
-		discreps[*niter] = pow(vectorMagnitude(n, grad), 2);
-		xCurr = xNext;
+		free(tempVec3);
 
 		free(grad);
-		free(xNext);
-	}while((*niter)++ < numit);
+		free (xCurr);
+
+		xCurr = xNext; // prepare for next iteration
+	}while(++(*niter) < numit);
 
 	for(i = 0; i < n; i++){
 		x[i] = xCurr[i];
@@ -92,7 +118,7 @@ double calculateGamma(int n, double** A, double* grad){
 
 double vectorMagnitude(int n, double* v){
 	int i;
-	double sum;
+	double sum = 0;
 	for(i = 0; i < n; i++){
 		sum += pow(v[i], 2);
 	}
@@ -130,37 +156,6 @@ double* matrixVectorMultiply(int n, double** m, double* v){
 	}
 	return ret;
 }
-
-// double** matrixScale(int n, double** m, double c){
-// 	double** ret = matrixCreate(n);
-// 	int i, j;
-// 	for(i = 0; i < n; i++){
-// 		for(j = 0; j < n; j++){
-// 			ret[i][j] = m[i][j] * c;
-// 		}
-// 	}
-// 	return ret;
-// }
-
-// multiplies 2 n x n matrices left and right, returns L*R as newly 
-// malloc'd n x n matrix.
-// CAUTION: does not free memory, so make sure that that's taken care
-// of externally. This is a potential source for a HUGE memory leak.
-// double** matrixMultiply(int n, double** left, double** right){
-// 	int i, j, k;
-// 	double vectorSum;
-// 	double** matrix = matrixCreate(n);
-// 	for(i = 0; i < n; i++){
-// 		for(j = 0; j < n; j++){
-// 			vectorSum = 0;
-// 			for(k = 0; k < n; k++){
-// 				vectorSum += left[i][k] * right[k][j];
-// 			}
-// 			matrix[i][j] = vectorSum;
-// 		}
-// 	}
-// 	return matrix;
-// }
 
 double** matrixTranspose(int n, double** matrix){
 	double** transpose = matrixCreate(n);
@@ -246,27 +241,39 @@ int main(){
 	for(k = 0; k < 4; k++){
 		int n = sizes[k];
 		printf("n = %d\n", n);
+
 		a = matrixCreate(n);
 		for(i = 0; i < n; i++){
 			a[i][i] = 1 / pow((i+1), 2);
 		}
-		y = malloc(n * sizeof(double));
-		for(i = 0; i < n; i++){
-			y[i] = 1;
-		}
 		printf("original a:\n");
 		matrixPrint(n, a);
+
+		y = malloc(n * sizeof(double));
+		for(i = 0; i < n; i++){
+			y[i] = 1.0;
+		}
 		printf("original y:\n");
 		flatPrint(n, y);
+
 		x = malloc(n * sizeof(double));
+
 		dumb_solve(matrixFlatten(n, a), y, n, eps, numit, x, niter, discreps);
+
 		printf("final x:\n");
 		flatPrint(n, x);
 		printf("niter: %d\n", *niter);
 		printf("discreps: ");
 		flatPrint(n, discreps);
 		printf("\n");
+
+		free(x);
+		free(y);
+		free(a);
 	}
+
+	free(discreps);
+	free(niter);
 
 	return 0;
 }
@@ -334,7 +341,7 @@ int main(){
 
 // ANALYSIS
 // It would seem that the growth of niters diminishes as the size of the system grows. We 
-// can't really generalize this, because our matrices are a special case. They are also
+// can't really generalize this, because our matrices are a special case (square). They are also
 // pretty easy to solve, and require relatively few iterations to converge. This algorithm
 // converges VERY slowly, requiring a number of iterations 100 times the size of the linear 
 // system it is solving. With a non-diagonal A matrix, this number would surely be larger. 
