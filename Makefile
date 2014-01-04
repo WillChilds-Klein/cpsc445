@@ -1,4 +1,4 @@
-CFLAGS = -g3 -std=c99 #-pedantic #-std=c99 -g3 -Wall
+CFLAGS = -g3 -std=c99 
 CC = gcc
 
 #all: seek
@@ -8,5 +8,5 @@ CC = gcc
 
 all: dumbsolve
 
-seek: dumbsolve.o
-		${CC} ${CFLAGS} -o dumbsolve dumbsolve.c -lm
+dumbsolve: dumbsolve.o
+		${CC} ${CFLAGS} dumbsolve.c -o dumbsolve -lm

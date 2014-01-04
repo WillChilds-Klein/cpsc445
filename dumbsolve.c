@@ -34,8 +34,6 @@ double vectorMagnitude(int n, double* v);
 double* vectorScale(int n, double* v, double c);
 double* vectorAdd(int n, double* u, double* v);
 double* matrixVectorMultiply(int n, double** m, double* v);
-double** matrixScale(int n, double** m, double c);
-double** matrixMultiply(int n, double** left, double** right);
 double** matrixTranspose(int n,double** matrix);
 double* matrixFlatten(int n, double** matrix);
 double** matrixExpand(int n, double* flat);
@@ -57,8 +55,8 @@ void dumb_solve(double* a, double* y, int n, double eps, int numit, double* x, i
 		if(*niter > 0 && discreps[(*niter)-1] < eps) // converged.
 			break;
 
-		grad = gradient(n, A, xCurr, y);
-		gamma = calculateGamma(n, A, grad);
+		grad = gradient(n, A, xCurr, y); // calculate gradient vector
+		gamma = calculateGamma(n, A, grad); // find next step size
 
 		tempVec1 = vectorScale(n, grad, -1*gamma); // make gradient negative
 		xNext = vectorAdd(n, xCurr, tempVec1); // find next guess for x
@@ -67,7 +65,7 @@ void dumb_solve(double* a, double* y, int n, double eps, int numit, double* x, i
 		tempVec1 = matrixVectorMultiply(n, A, xNext);
 		tempVec2 = vectorScale(n, y, -1);
 		tempVec3 = vectorAdd(n, tempVec1, tempVec2);
-		discreps[*niter] = pow(vectorMagnitude(n, tempVec3), 2);
+		discreps[*niter] = pow(vectorMagnitude(n, tempVec3), 2); // discrepancy
 		free(tempVec1);
 		free(tempVec2);
 		free(tempVec3);
@@ -91,6 +89,7 @@ void dumb_solve(double* a, double* y, int n, double eps, int numit, double* x, i
 // calculates gradient vector of matrix A.
 double* gradient(int n, double** A, double* x, double* y){
 	double *left, *right, *grad, *tempVec1, *tempVec2, **transp;
+	int i;
 
 	tempVec1 = matrixVectorMultiply(n, A, x);
 	tempVec2 = vectorScale(n, y, -1);
@@ -100,10 +99,14 @@ double* gradient(int n, double** A, double* x, double* y){
 
 	transp = matrixTranspose(n, A);
 	left = matrixVectorMultiply(n, transp, right);
-
 	grad = vectorScale(n, left, 2);
+	
 	free(right);
 	free(left);
+	// destroy transpose
+	for(i = 0; i < n; i++)
+		free(transp[i]);
+	free(transp);
 
 	return grad;
 }
@@ -228,11 +231,11 @@ void flatPrint(int n, double* flat){
 }
 
 int main(){
-	double **a, *y, eps, *x, *discreps;
-	int n, numit, *niter, i, k;
+	double **a, *y, eps, *x, *discreps, *flatA;
+	int n, numit, *niter, i, j, k;
 
 	eps = pow(10, -6);
-	numit = 1000;
+	numit = 10000;
 	discreps = calloc(numit, sizeof(double));
 	niter = malloc(sizeof(int));
 
@@ -258,7 +261,9 @@ int main(){
 
 		x = malloc(n * sizeof(double));
 
-		dumb_solve(matrixFlatten(n, a), y, n, eps, numit, x, niter, discreps);
+		flatA = matrixFlatten(n, a);
+		dumb_solve(flatA, y, n, eps, numit, x, niter, discreps);
+		free(flatA);
 
 		printf("final x:\n");
 		flatPrint(n, x);
@@ -269,6 +274,8 @@ int main(){
 
 		free(x);
 		free(y);
+		for(j = 0; j < n; j++)
+			free(a[j]);
 		free(a);
 	}
 
@@ -288,9 +295,9 @@ int main(){
 // original y:
 // 1.000000, 1.000000, 1.000000, 
 // final x:
-// 0.998692, 4.000000, 8.966841, 
-// niter: 78
-// discreps: 4.299383, 0.285634, 1.171258, 
+// 1.000034, 4.000000, 8.991110, 
+// niter: 97
+// discreps: 1.849377, 1.250871, 0.935307, 
 
 // n = 4
 // original a:
@@ -301,9 +308,9 @@ int main(){
 // original y:
 // 1.000000, 1.000000, 1.000000, 1.000000, 
 // final x:
-// 0.998625, 4.000000, 8.999999, 15.885888, 
-// niter: 222
-// discreps: 4.315008, 0.303255, 1.293981, 0.103682, 
+// 1.000020, 4.000000, 9.000000, 15.984136, 
+// niter: 311
+// discreps: 2.841016, 2.209011, 1.858582, 1.624633, 
 
 // n = 6
 // original a:
@@ -316,9 +323,9 @@ int main(){
 // original y:
 // 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 
 // final x:
-// 0.998578, 4.000000, 9.000000, 16.000000, 24.994915, 35.393471, 
-// niter: 938
-// discreps: 4.324494, 0.314068, 1.369973, 0.114399, 0.666650, 0.064228, 
+// 0.998915, 4.000000, 9.000000, 16.000000, 24.997104, 35.537180, 
+// niter: 1000
+// discreps: 4.835918, 4.183746, 3.811623, 3.553460, 3.370466, 3.216369, 
 
 // n = 10
 // original a:
@@ -335,9 +342,9 @@ int main(){
 // original y:
 // 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 
 // final x:
-// 1.002953, 4.000000, 9.000000, 16.000000, 24.997047, 35.532854, 44.285927, 47.758530, 46.577640, 42.954276, 
-// niter: 1001
-// discreps: 4.328146, 0.318252, 1.399390, 0.118634, 0.699716, 0.068310, 0.508946, 0.052399, 0.422263, 0.044069,
+// 0.972983, 4.000000, 9.000000, 16.000000, 24.997042, 35.532453, 44.283748, 47.754130, 46.571819, 42.947947, 
+// niter: 1000
+// discreps: 8.833951, 8.174075, 7.793534, 7.525918, 7.333635, 7.170017, 7.029558, 6.901693, 6.785027, 6.676876, 6, 0.318252, 1.399390, 0.118634, 0.699716, 0.068310, 0.508946, 0.052399, 0.422263, 0.044069,
 
 // ANALYSIS
 // It would seem that the growth of niters diminishes as the size of the system grows. We 
