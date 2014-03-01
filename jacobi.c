@@ -393,74 +393,76 @@ void flatPrint(int n, double* flat){
 	return;
 }
 
-// int main(){
+/** /
+int main(){
 
-// 	double** a;
-// 	int n;
+	double** a;
+	int n;
 
-// 	double *sb10, *ub10, *vb10,
-// 			*sb20, *ub20, *vb20,
-// 			*sb40, *ub40, *vb40,
-// 			*sc10, *uc10, *vc10;
+	double *sb10, *ub10, *vb10,
+			*sb20, *ub20, *vb20,
+			*sb40, *ub40, *vb40,
+			*sc10, *uc10, *vc10;
 
-// 	printf("Part b, dimensionality 10.\n");
-// 	n = 10;
-// 	a = partb(n);
-// 	sb10 = malloc(n * sizeof(double));
-// 	ub10 = malloc(n*n * sizeof(double));
-// 	vb10 = malloc(n*n * sizeof(double));
+	printf("Part b, dimensionality 10.\n");
+	n = 10;
+	a = partb(n);
+	sb10 = malloc(n * sizeof(double));
+	ub10 = malloc(n*n * sizeof(double));
+	vb10 = malloc(n*n * sizeof(double));
 
-// 	jacobi(matrixFlatten(n, a), n, sb10, ub10, vb10);
+	jacobi(matrixFlatten(n, a), n, sb10, ub10, vb10);
 
-// 	matrixDestroy(n, a);
-// 	free(sb10);
-// 	free(ub10);
-// 	free(vb10);
+	matrixDestroy(n, a);
+	free(sb10);
+	free(ub10);
+	free(vb10);
 
-// 	printf("\nPart b, dimensionality 20.\n");
-// 	n = 20;
-// 	a = partb(n);
-// 	sb20 = malloc(n * sizeof(double));
-// 	ub20 = malloc(n*n * sizeof(double));
-// 	vb20 = malloc(n*n * sizeof(double));
+	printf("\nPart b, dimensionality 20.\n");
+	n = 20;
+	a = partb(n);
+	sb20 = malloc(n * sizeof(double));
+	ub20 = malloc(n*n * sizeof(double));
+	vb20 = malloc(n*n * sizeof(double));
 
-// 	jacobi(matrixFlatten(n, a), n, sb20, ub20, vb20);
+	jacobi(matrixFlatten(n, a), n, sb20, ub20, vb20);
 
-// 	matrixDestroy(n, a);
-// 	free(sb20);
-// 	free(ub20);
-// 	free(vb20);
+	matrixDestroy(n, a);
+	free(sb20);
+	free(ub20);
+	free(vb20);
 
-// 	printf("\nPart b, dimensionality 40.\n");
-// 	n = 40;
-// 	a = partb(n);
-// 	sb40 = malloc(n * sizeof(double));
-// 	ub40 = malloc(n*n * sizeof(double));
-// 	vb40 = malloc(n*n * sizeof(double));
+	printf("\nPart b, dimensionality 40.\n");
+	n = 40;
+	a = partb(n);
+	sb40 = malloc(n * sizeof(double));
+	ub40 = malloc(n*n * sizeof(double));
+	vb40 = malloc(n*n * sizeof(double));
 
-// 	jacobi(matrixFlatten(n, a), n, sb40, ub40, vb40);
+	jacobi(matrixFlatten(n, a), n, sb40, ub40, vb40);
 
-// 	matrixDestroy(n, a);
-// 	free(sb40);
-// 	free(ub40);
-// 	free(vb40);
+	matrixDestroy(n, a);
+	free(sb40);
+	free(ub40);
+	free(vb40);
 
-// 	printf("\nPart c, dimensionality 10.\n");
-// 	n = 10;
-// 	a = partc(n);
-// 	sc10 = malloc(n * sizeof(double));
-// 	uc10 = malloc(n*n * sizeof(double));
-// 	vc10 = malloc(n*n * sizeof(double));
+	printf("\nPart c, dimensionality 10.\n");
+	n = 10;
+	a = partc(n);
+	sc10 = malloc(n * sizeof(double));
+	uc10 = malloc(n*n * sizeof(double));
+	vc10 = malloc(n*n * sizeof(double));
 
-// 	jacobi(matrixFlatten(n, a), n, sc10, uc10, vc10);
+	jacobi(matrixFlatten(n, a), n, sc10, uc10, vc10);
 
-// 	matrixDestroy(n, a);
-// 	free(sc10);
-// 	free(uc10);
-// 	free(vc10);
+	matrixDestroy(n, a);
+	free(sc10);
+	free(uc10);
+	free(vc10);
 
-// 	return 0;
-// }
+	return 0;
+}
+/**/
 
 // Part b, dimensionality 10.
 
